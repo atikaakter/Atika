@@ -1,0 +1,99 @@
+import numpy as np
+import pandas as pd
+import os
+import seaborn as sns
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+from rdkit import Chem
+from rdkit import DataStructs
+from rdkit import rdBase
+from rdkit import RDConfig
+from rdkit.Chem import ChemicalFeatures
+from rdkit.Chem import AllChem
+from rdkit.Chem import Draw
+from rdkit.Chem.Draw import IPythonConsole
+from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint
+from rdkit.Chem.Draw import SimilarityMaps
+from rdkit.SimDivFilters.rdSimDivPickers import MaxMinPicker
+from rdkit.Chem.Pharm2D import Gobbi_Pharm2D,Generate
+from rdkit.Chem import rdMolDescriptors as rdescriptors
+from rdkit.Chem import Descriptors
+
+from sklearn import model_selection
+from sklearn import linear_model
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
+from sklearn.metrics import *
+from sklearn.preprocessing import LabelEncoder,label_binarize
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPRegressor
+from sklearn.svm import SVR
+
+
+Test_Size = 0.2
+#Read File
+df = pd.read_csv('/home/is/mostatika-a/Balanced-SARS-CoV-2_pAC50.csv', index_col=0)
+df
+
+#Convert SMILES to molecules
+df['molecules'] = df.SMILES.apply(Chem.MolFromSmiles)
+
+#Convert Molecules to Fingerprints
+df['ECFP4']=df.molecules.apply(lambda m: AllChem.GetMorganFingerprintAsBitVect(m, radius=2, nBits=1024))
+df['ECFP6']=df.molecules.apply(lambda m: AllChem.GetMorganFingerprintAsBitVect(m, radius=3, nBits=1024))
+df['ECFP8']=df.molecules.apply(lambda m: AllChem.GetMorganFingerprintAsBitVect(m, radius=4, nBits=1024))
+df['ECFP10']=df.molecules.apply(lambda m: AllChem.GetMorganFingerprintAsBitVect(m, radius=5, nBits=1024))
+df['ECFP12']=df.molecules.apply(lambda m: AllChem.GetMorganFingerprintAsBitVect(m, radius=6, nBits=1024))
+df['RDKFP']=df.molecules.apply(lambda m: AllChem.RDKFingerprint(m, fpSize=1024))
+
+ECFP4 = np.array(list(df['ECFP4']))
+ECFP6 = np.array(list(df['ECFP6']))
+ECFP8 = np.array(list(df['ECFP8']))
+ECFP10 = np.array(list(df['ECFP10']))
+ECFP12 = np.array(list(df['ECFP12']))
+RDKFP = np.array(list(df['RDKFP']))
+Active = df['Active'].values
+
+#Test-ECFP4
+X_train, X_test, y_train, y_test = model_selection.train_test_split(ECFP4, Active, test_size= Test_Size)
+print('0:',list(y_train).count(0),list(y_test).count(0))
+print('1:',list(y_train).count(1),list(y_test).count(1))
+
+#For Logistic Regression
+model = LogisticRegression()
+model.fit(X_train, y_train)
+train_ac= model.score(X_train,y_train)
+test_ac= model.score(X_test,y_test)
+print("Train_accuracy_score:",round(train_ac,3))
+print("Test_accuracy_score:",round(test_ac,3))
+
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+y_predicted = model.predict(X_test)
+f1 = f1_score(y_test,y_predicted)
+print("F1 Score for logistic regression:", round(f1,3))
+pres = precision_score(y_test,y_predicted)
+print("Precision_Score for logistic regression:", round(pres,3))
+res = recall_score(y_test,y_predicted)
+print("Recall_Score for logistic regression:", round(res,3))
+print("\n")
+from sklearn.metrics import classification_report
+print(classification_report(y_test,y_predicted))
+
+fpr, tpr, thresholds = metrics.roc_curve(y_test, y_predicted)
+roc_auc = auc(fpr, tpr)
+
+plt.title('ROC-ECFP4-LogisticRegression')
+plt.plot(fpr, tpr, 'b',label='AUC = %0.2f'% roc_auc)
+plt.legend(loc='lower right')
+plt.plot([0,1],[0,1],'r--')
+plt.xlim([-0.1,1.2])
+plt.ylim([-0.1,1.2])
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.savefig("ROC.jpg", dpi = 300)
+plt.show()
