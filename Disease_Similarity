@@ -1,0 +1,81 @@
+import numpy as np
+import pandas as pd
+
+df1 = pd.read_excel('/home/is/mostatika-a/Research/Drug_Disease.xlsx')
+#print(df1.head(10))
+df2 = pd.read_excel('/home/is/mostatika-a/Research/Potential_Drug(Name).xlsx')
+#print(df2.head(10))
+
+df3 = pd.read_excel('/home/is/mostatika-a/Research/Drug_Gene.xlsx')
+print(df3.head(10))
+df4 = pd.read_excel('/home/is/mostatika-a/Research/IBD_Gene.xlsx')
+print(df4.head(10))
+
+drgene = pd.read_excel('/home/is/mostatika-a/Research/Drug_Gene_Disease_Gene.xlsx' , sheet_name='drgene')
+dsgene = pd.read_excel('/home/is/mostatika-a/Research/Drug_Gene_Disease_Gene.xlsx' , sheet_name='disgene')
+
+
+drgene= drgene.rename(columns=lambda x: x.strip())
+dsgene= dsgene.rename(columns=lambda x: x.strip())
+
+dddata = pd.DataFrame(columns=['drug','gene', 'disease'])
+count=0
+dr = drgene['Drug'].unique()
+for pi in range (0, len(dr)-1):
+    ss = drgene.loc[drgene['Drug'] == dr[pi]]
+    for index, rs in ss.iterrows():
+        dd = dsgene.loc[dsgene['Gene'] == rs['Gene']]
+        for index , ds in dd.iterrows():
+            dddata.loc[count] = [dr[pi], rs['Gene'], ds['Disease'] ] 
+            count=count+1
+dddata.head(10)
+  
+dsgene = pd.read_excel('/home/is/mostatika-a/Research/Disease_Gene_Association.xlsx')
+dsgene= dsgene.rename(columns=lambda x: x.strip())
+dsname = (dsgene['DName'].unique()).tolist()
+
+#Clustering
+disgenid = pd.DataFrame(columns=['dname','gene'])
+count=0
+for i in range(len(dsname)):
+    ss = dsgene.loc[dsgene['DName'] == dsname[i]]
+    glist = (ss['GID'].unique()).tolist()
+    disgenid.loc[count] = [dsname[i], glist] 
+    count=count+1
+
+disgenid  
+
+disgenid.to_excel('/home/is/mostatika-a/Research/DiGe_Cluster.xlsx')
+drgene = pd.read_excel('/home/is/mostatika-a/Research/All_Data_And_Results.xlsx' , sheet_name='Drug_Gene_Data')
+Ggene = pd.read_excel('/home/is/mostatika-a/Research/All_Data_And_Results.xlsx' , sheet_name='Gene_ID')
+drgene= drgene.rename(columns=lambda x: x.strip())
+Ggene= Ggene.rename(columns=lambda x: x.strip())
+
+#Calculate Similarity Score between IBD disease and other disease
+dddata = pd.DataFrame(columns=['drug','geneU', 'geneID'])
+count=0
+dr = drgene['Drug'].unique()
+for pi in range (0, len(dr)-1):
+    ss = drgene.loc[drgene['Drug'] == dr[pi]]
+    for index, rs in ss.iterrows():
+        dd = Ggene.loc[Ggene['Gene'] == rs['Gene']]
+        for index , ds in dd.iterrows():
+            dddata.loc[count] = [dr[pi], rs['Gene'], ds['GeneID'] ] 
+            count=count+1
+dddata.to_excel('/home/is/mostatika-a/Research/drug_GUni_GID.xlsx')        
+
+dsgene = pd.read_excel('/home/is/mostatika-a/Research/Disease_Gene_Association.xlsx')
+dsgene= dsgene.rename(columns=lambda x: x.strip())
+Out = pd.read_excel('/home/is/mostatika-a/Research/Output.xlsx' , sheet_name='Sheet1')
+Out = Out.rename(columns=lambda x: x.strip())
+
+dddata = pd.DataFrame(columns=['GeneID','DName', 'SimID'])
+count=0
+gid = dsgene['GID'].unique()
+for pi in range (0, len(gid)-1):
+    ss = dsgene.loc[dsgene['GID'] == gid[pi]]
+    for index, rs in ss.iterrows():
+        dd = Out.loc[Out['DName'] == rs['DName']]
+        for index , ds in dd.iterrows():
+            dddata.loc[count] = [gid[pi], rs['DName'], ds['SimID'] ] 
+            count=count+1
