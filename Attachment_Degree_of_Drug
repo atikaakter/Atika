@@ -1,0 +1,20 @@
+import numpy as np
+import pandas as pd
+
+#Create adjacency matrix
+df = pd.read_excel('/home/is/mostatika-a/Research/Drug_IBD_Gene_Adjacency.xlsx')
+
+#Find attachment degree
+column = df[['Count']]
+print(column)
+print(type(column))
+column.to_excel('/home/is/mostatika-a/Research/Result.xlsx')
+
+#create histogram plot
+import matplotlib.pyplot as plt
+plt.title('Histogram Plot')
+plt.xlabel('Drug')
+plt.ylabel('Frequency')
+plt.hist(df['Count'], bins=30,alpha=.5,color='purple' )
+plt.hist(df['Drug'], bins=[0,.25,.5,.5], alpha=.5,  orientation='horizontal',color='White')
+plt.show()
