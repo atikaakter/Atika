@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 #Create adjacency matrix
-df = pd.read_excel('/home/is/mostatika-a/Research/Drug_IBD_Gene_Adjacency.xlsx')
+df = pd.read_excel('/home/is/mostatika-a/Research/Drug_Gene_Interactions.xlsx')
 
 #Find attachment degree
 column = df[['Count']]
