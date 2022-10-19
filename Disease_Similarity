@@ -1,18 +1,8 @@
 import numpy as np
 import pandas as pd
 
-df1 = pd.read_excel('/home/is/mostatika-a/Research/Drug_Disease.xlsx')
-#print(df1.head(10))
-df2 = pd.read_excel('/home/is/mostatika-a/Research/Potential_Drug(Name).xlsx')
-#print(df2.head(10))
-
-df3 = pd.read_excel('/home/is/mostatika-a/Research/Drug_Gene.xlsx')
-print(df3.head(10))
-df4 = pd.read_excel('/home/is/mostatika-a/Research/IBD_Gene.xlsx')
-print(df4.head(10))
-
-drgene = pd.read_excel('/home/is/mostatika-a/Research/Drug_Gene_Disease_Gene.xlsx' , sheet_name='drgene')
-dsgene = pd.read_excel('/home/is/mostatika-a/Research/Drug_Gene_Disease_Gene.xlsx' , sheet_name='disgene')
+drgene = pd.read_excel('/home/is/mostatika-a/Research/Disease_Gene_Association.xlsx' , sheet_name='drgene')
+dsgene = pd.read_excel('/home/is/mostatika-a/Research/Disease_Gene_Association.xlsx' , sheet_name='disgene')
 
 
 drgene= drgene.rename(columns=lambda x: x.strip())
