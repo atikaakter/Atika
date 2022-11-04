@@ -1,0 +1,14 @@
+import pandas as pd
+from matplotlib import pyplot as plt
+from matplotlib_venn import venn2
+from matplotlib_venn import venn3
+
+df = pd.read_excel('/home/is/mostatika-a/IBD_Gene_DatabaseName.xlsx')
+print(df.head(10))
+
+#Create Venn Diagram
+venn3([set(df['CTD'].to_list()), 
+       set(df['Disgenet'].to_list()),
+       set(df['GWAS'].to_list())],
+       set_labels=('CTD', 'DisGenet','GWAS')
+     )
